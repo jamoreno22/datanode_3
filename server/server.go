@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -22,9 +21,56 @@ var books = []data.Book{}
 var distributionType string
 
 func main() {
+	// NameNodeServer Connection ---------------------------------------
+	var nameConn *grpc.ClientConn
 
-	// create a listener on TCP port 7777
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 7777))
+	nameConn, err := grpc.Dial("10.10.28.20:9000", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("Did not connect: %s", err)
+	}
+
+	defer nameConn.Close()
+
+	nameClient := data.NewNameNodeClient(nameConn)
+	proposals := []data.Proposal{}
+	proposals = append(proposals, data.Proposal{Ip: "8000", Chunk: &data.Chunk{Name: "Chunk1", Data: []byte("ABC€")}})
+	proposals = append(proposals, data.Proposal{Ip: "8001", Chunk: &data.Chunk{Name: "Chunk2", Data: []byte("ABC2")}})
+
+	runSendProposal(nameClient, proposals)
+
+	bookName := "Mujercitas-Alcott_Louisa_May.pdf"
+
+	runGetChunkDistribution(nameClient, &data.Message{Text: bookName})
+
+	resp, err := nameClient.GetBookInfo(context.Background(), &data.Book{Name: bookName, Parts: 3})
+	if err != nil {
+		log.Fatalf("Did not connect: %s", err)
+	}
+	log.Println(resp)
+
+	// Datanode_1 Connection -------------------------------------------
+	var datanode1Conn *grpc.ClientConn
+
+	datanode1Conn, err2 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %s", err2)
+	}
+
+	defer datanode1Conn.Close()
+
+	// Datanode_2 Connection -------------------------------------------
+	var datanode2Conn *grpc.ClientConn
+
+	datanode2Conn, err3 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("did not connect: %s", err3)
+	}
+
+	defer datanode2Conn.Close()
+
+	// Server Logic ----------------------------------------------------
+	// create a listener on TCP port 9000
+	lis, err := net.Listen("tcp", "10.10.28.19:9000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -38,6 +84,60 @@ func main() {
 		log.Fatalf("failed to serve: %s", err)
 	}
 
+}
+
+//- - - - - - - - - - -  - - NameNode Client functions - - - - - -  -- - - - -
+
+func runGetChunkDistribution(nc data.NameNodeClient, bookName *data.Message) ([]data.Proposal, error) {
+	stream, err := nc.GetChunkDistribution(context.Background(), bookName)
+	if err != nil {
+		log.Printf("%v", err)
+	}
+	proposals := []data.Proposal{}
+	for {
+		feature, err := stream.Recv()
+		if err == io.EOF {
+			return proposals, nil
+		}
+		if err != nil {
+			log.Fatalf("%v.ListFeatures(_) = _, %v", nc, err)
+		}
+		proposals = append(proposals, *feature)
+	}
+}
+
+func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
+
+	stream, err := nc.SendProposal(context.Background())
+	if err != nil {
+		log.Println("Error de stream send proposal")
+	}
+
+	log.Println("ki voy")
+	a := 1
+	for _, prop := range proposals {
+
+		if err := stream.Send(&prop); err != nil {
+			log.Println("error al enviar chunk")
+			log.Fatalf("%v.Send(%d) = %v", stream, a, err)
+		}
+		a = a + 1
+	}
+	for {
+		log.Println("ki voy")
+
+		in, err := stream.Recv()
+		if err == io.EOF {
+			// read done.
+			//DistributeChunks()
+			log.Printf("weno")
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("Failed to receive a proposal : %v", err)
+		}
+		log.Printf("Got a proposal ip :%s ", in.Ip)
+	}
 }
 
 // - - - - - - - - - - - - - DataNode Server functions - - - - - - - - - - - -

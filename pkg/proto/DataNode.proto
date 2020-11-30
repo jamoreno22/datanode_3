@@ -15,12 +15,22 @@ service DataNode {
 
 }
 
+service NameNode {
+
+    rpc GetBookInfo(Book) returns (Message) {}
+    //Centralizado
+    rpc SendProposal(stream Proposal) returns (stream Proposal) {}
+    rpc GetChunkDistribution(Message) returns (stream Proposal) {}
+}
+
 message File{
     bytes log = 1;
 }
 
 message Book {
-    repeated Chunk chunks = 1;
+    string name = 1;
+    int32 parts = 2;
+    repeated Chunk chunks = 3;
 }
 
 message Chunk{
