@@ -3,13 +3,17 @@ package main
 import (
 	"context"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
+	"os"
 	"time"
 
 	data "github.com/jamoreno22/lab2_dist/datanode_3/pkg/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type dataNodeServer struct {
@@ -19,8 +23,11 @@ type dataNodeServer struct {
 // books variable when books are saved
 var books = []data.Book{}
 var distributionType string
+var bookName string
+var bookParts int32
 
 func main() {
+
 	// NameNodeServer Connection ---------------------------------------
 	var nameConn *grpc.ClientConn
 
@@ -31,24 +38,9 @@ func main() {
 
 	defer nameConn.Close()
 
-	nameClient := data.NewNameNodeClient(nameConn)
-	proposals := []data.Proposal{}
-	proposals = append(proposals, data.Proposal{Ip: "8000", Chunk: &data.Chunk{Name: "Chunk1", Data: []byte("ABC€")}})
-	proposals = append(proposals, data.Proposal{Ip: "8001", Chunk: &data.Chunk{Name: "Chunk2", Data: []byte("ABC2")}})
+	//runGetChunkDistribution(nameClient, &data.Message{Text: bookName})
 
-	runSendProposal(nameClient, proposals)
-
-	bookName := "Mujercitas-Alcott_Louisa_May.pdf"
-
-	runGetChunkDistribution(nameClient, &data.Message{Text: bookName})
-
-	resp, err := nameClient.GetBookInfo(context.Background(), &data.Book{Name: bookName, Parts: 3})
-	if err != nil {
-		log.Fatalf("Did not connect: %s", err)
-	}
-	log.Println(resp)
-
-	// Datanode_1 Connection -------------------------------------------
+	// Datanode_2 Connection -------------------------------------------
 	var datanode1Conn *grpc.ClientConn
 
 	datanode1Conn, err2 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
@@ -70,7 +62,7 @@ func main() {
 
 	// Server Logic ----------------------------------------------------
 	// create a listener on TCP port 9000
-	lis, err := net.Listen("tcp", "10.10.28.19:9000")
+	lis, err := net.Listen("tcp", "10.10.28.18:9000")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -123,24 +115,40 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 		}
 		a = a + 1
 	}
+	finalProposals := []data.Proposal{}
 	for {
 		log.Println("ki voy")
 
 		in, err := stream.Recv()
 		if err == io.EOF {
 			// read done.
-			//DistributeChunks()
+			runDistributeChunks(finalProposals)
+
 			log.Printf("weno")
 			return nil
 		}
 		if err != nil {
 			log.Fatalf("Failed to receive a proposal : %v", err)
 		}
-		log.Printf("Got a proposal ip :%s ", in.Ip)
+		//in es cada proposal
+		finalProposals = append(finalProposals, *in)
+
 	}
 }
 
 // - - - - - - - - - - - - - DataNode Server functions - - - - - - - - - - - -
+
+//Distribute chunk server side
+func (d *dataNodeServer) DistributeChunks(ctx context.Context, req *data.Chunk) (*data.Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DistributeChunks not implemented")
+}
+
+//SendBookInfo
+func (d *dataNodeServer) SendBookInfo(ctx context.Context, req *data.Book) (*data.Message, error) {
+	bookName = req.Name
+	bookParts = req.Parts
+	return nil, nil
+}
 
 //DistributionType server side
 func (d *dataNodeServer) DistributionType(ctx context.Context, req *data.Message) (*data.Message, error) {
@@ -148,28 +156,47 @@ func (d *dataNodeServer) DistributionType(ctx context.Context, req *data.Message
 	return &data.Message{Text: "Recibido"}, nil
 }
 
-// DistributeChunks server side
-func (d *dataNodeServer) DistributeChunks(dcs data.DataNode_DistributeChunksServer) error {
-	log.Printf("Stream DistributeChunks")
+// DistributeChunks in another datanodes
+func runDistributeChunks(props []data.Proposal) error {
+	for _, prop := range props {
 
-	sP := []data.Proposal{}
-
-	for {
-		prop, err := dcs.Recv()
-		if err == io.EOF {
-			return (dcs.SendAndClose(&data.Message{Text: "Oh no... EOF"}))
+		//-----  crear las conexiones a los otros datanodes ----------------------
+		var datanode2Conn *grpc.ClientConn
+		datanode2Conn, err2 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
+		if err2 != nil {
+			log.Fatalf("did not connect: %s", err2)
 		}
-		if err != nil {
-			return err
-		}
+		defer datanode2Conn.Close()
 
-		sP = append(sP, *prop)
-		return nil
+		// Datanode_3 Connection -------------------------------------------
+		var datanode3Conn *grpc.ClientConn
+		datanode3Conn, err3 := grpc.Dial("10.10.28.19:9000", grpc.WithInsecure())
+		if err3 != nil {
+			log.Fatalf("did not connect: %s", err3)
+		}
+		defer datanode3Conn.Close()
+
+		if prop.Ip == "10.10.28.17:9000" {
+			// write/save buffer to disk
+			ioutil.WriteFile(prop.Chunk.Name, prop.Chunk.Data, os.ModeAppend)
+		} else if prop.Ip == "10.10.28.18:9000" {
+			datanode2Client := data.NewDataNodeClient(datanode2Conn)
+			_, err := datanode2Client.DistributeChunks(context.Background(), prop.Chunk)
+			if err != nil {
+				log.Printf("%v", err)
+			}
+		} else if prop.Ip == "10.10.28.19:9000" {
+			datanode3Client := data.NewDataNodeClient(datanode3Conn)
+			_, err := datanode3Client.DistributeChunks(context.Background(), prop.Chunk)
+			if err != nil {
+				log.Printf("%v", err)
+			}
+		}
 	}
+	return nil
 }
 
 // UploadBook server side
-
 func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 	log.Printf("Stream UploadBook")
 	book := data.Book{}
@@ -190,8 +217,22 @@ func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 
 			}
 
-			//enviar prop al server del NameNode
+			// NameNodeServer Connection ---------------------------------------
+			var nameConn *grpc.ClientConn
+			nameConn, err := grpc.Dial("10.10.28.20:9000", grpc.WithInsecure())
+			if err != nil {
+				log.Fatalf("Did not connect: %s", err)
+			}
+			defer nameConn.Close()
+			nameClient := data.NewNameNodeClient(nameConn)
+			//-------------------------------------------------------------------
 
+			// Send Book Info to NameNodeServer
+			_, err4 := nameClient.GetBookInfo(context.Background(), &data.Book{Name: bookName, Parts: bookParts})
+			if err4 != nil {
+				log.Fatalf("Did not connect: %s", err4)
+			}
+			runSendProposal(nameClient, prop)
 			return (ubs.SendAndClose(&data.Message{Text: "EOF"}))
 		}
 		if err != nil {
