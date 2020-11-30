@@ -2,10 +2,11 @@ syntax = "proto3";
 
 //option go_package= "github.com/jamoreno22/lab2_dist";
 
-package lab2;
+package lab;
 
 service DataNode {
 
+    rpc DistributionType(Message) returns (Message){}
     rpc DistributeChunks(stream Proposal) returns (Message) {}
     rpc UploadBook(stream Chunk) returns (Message) {}
     rpc DownloadBook(Message) returns (stream Chunk) {}
@@ -14,17 +15,12 @@ service DataNode {
 
 }
 
-service NameNode {
-
-    rpc WriteLog(stream Proposal) returns (Message) {}
-    //Centralizado
-    rpc SendProposal(stream Proposal) returns (stream Proposal) {}
-    rpc GenerateProposal(stream Proposal) returns (stream Proposal) {}
-
+message File{
+    bytes log = 1;
 }
 
 message Book {
-    repeated Chunk chunks =1;
+    repeated Chunk chunks = 1;
 }
 
 message Chunk{

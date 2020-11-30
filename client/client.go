@@ -1,17 +1,21 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
 	"strconv"
 
-	gral "github.com/jamoreno22/lab2_dist/pkg/proto"
+	data "github.com/jamoreno22/datanode_3/pkg/proto"
 	"google.golang.org/grpc"
 )
+
+var bookName string
 
 func main() {
 	var conn *grpc.ClientConn
@@ -23,16 +27,65 @@ func main() {
 
 	defer conn.Close()
 
-	dc := gral.NewDataNodeClient(conn)
-	fileToBeChunked := "books/Mujercitas-Alcott_Louisa_May.pdf"
+	//dc := gral.NewDataNodeClient(conn)
 
-	uploadBook2(dc, fileToBeChunked)
+	fmt.Println("Seleccione qué desea hacer:")
+	fmt.Println("0 : Cargar un libro")
+	fmt.Println("1 : Descargar un libro")
 
-	log.Println("Client connected...")
+	reader := bufio.NewReader(os.Stdin)
+	char, _, err := reader.ReadRune()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	switch char {
+	//Upload
+	case '0':
+		fmt.Println("Carga")
+		fmt.Println("Seleccione distribución:")
+		fmt.Println("0 : Centralizada")
+		fmt.Println("1 : Distribuida")
+		r := bufio.NewReader(os.Stdin)
+		c, _, err := r.ReadRune()
+
+		if err != nil {
+			fmt.Println(err)
+		}
+		switch c {
+		//Centralizado
+		case '0':
+			//dc.DistributionType(context.Background(), data.Message{Text: "0"})
+			break
+		//Distribuido
+		case '1':
+			//dc.DistributionType(context.Background(), data.Message{Text: "1"})
+			break
+		}
+		break
+	//Download
+	case '1':
+		fmt.Println("Ingrese nombre del libro a descargar: ")
+		r := bufio.NewReader(os.Stdin)
+		c, _, err := r.ReadRune()
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println(c)
+		break
+	}
+
+	//var fileToBeChunked string
+	//fileToBeChunked = "books/Mujercitas-Alcott_Louisa_May.pdf"
+	//bookName = "Mujercitas-Alcott_Louisa_May.pdf"
+	//runUploadBook(dc, fileToBeChunked)
 
 }
 
-func uploadBook2(dc gral.DataNodeClient, fileToBeChunked string) error {
+func runUploadBook(dc data.DataNodeClient, fileToBeChunked string) error {
 	// -    - - - - - - -  - -    particionar pdf en chunks - - - - -  - - - -
 
 	file, err := os.Open(fileToBeChunked)
@@ -56,7 +109,7 @@ func uploadBook2(dc gral.DataNodeClient, fileToBeChunked string) error {
 
 	fmt.Printf("Splitting to %d pieces.\n", totalPartsNum)
 
-	book := make([]*gral.Chunk, totalPartsNum)
+	book := make([]*data.Chunk, totalPartsNum)
 
 	for i := uint64(0); i < totalPartsNum; i++ {
 
@@ -66,7 +119,7 @@ func uploadBook2(dc gral.DataNodeClient, fileToBeChunked string) error {
 		file.Read(partBuffer)
 
 		// write to disk
-		fileName := "somebigfile_" + strconv.FormatUint(i, 10)
+		fileName := bookName + "_" + strconv.FormatUint(i, 10)
 		_, err := os.Create(fileName)
 
 		if err != nil {
@@ -78,7 +131,7 @@ func uploadBook2(dc gral.DataNodeClient, fileToBeChunked string) error {
 		ioutil.WriteFile(fileName, partBuffer, os.ModeAppend)
 
 		// books instantiation
-		book[i] = &gral.Chunk{Name: fileName, Data: partBuffer}
+		book[i] = &data.Chunk{Name: fileName, Data: partBuffer}
 
 		fmt.Println("Split to : ", fileName)
 		log.Println("tamaño: ", partSize)
@@ -102,5 +155,120 @@ func uploadBook2(dc gral.DataNodeClient, fileToBeChunked string) error {
 		log.Println("Error recepcion response")
 	}
 	log.Printf("Route summary: %v", reply)
+	return nil
+}
+
+func runDownloadBook(dc data.DataNodeClient, msg string) error {
+	var chunks []data.Chunk
+	stream, err := dc.DownloadBook(context.Background(), data.Message{Text: msg})
+	if err != nil {
+		return err
+	}
+	for {
+		chunk, err := stream.Recv()
+		if err == io.EOF {
+			//funcion para reconstruir los libros
+			return nil
+		}
+		if err != nil {
+			log.Fatalf("%v.ListFeatures(_) = _, %v", dc, err)
+		}
+		chunks = append(chunks, chunk)
+	}
+}
+
+func rebuildBook(chunks []data.Chunk) error {
+
+	newFileName := bookName + ".zip"
+	_, err := os.Create(newFileName)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	//set the newFileName file to APPEND MODE!!
+	// open files r and w
+
+	file, err := os.OpenFile(newFileName, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// IMPORTANT! do not defer a file.Close when opening a file for APPEND mode!
+	// defer file.Close()
+
+	// just information on which part of the new file we are appending
+	var writePosition int64 = 0
+
+	for j := uint64(0); j < uint64(len(chunks)); j++ {
+
+		//read a chunk
+		currentChunkFileName := bookName + strconv.FormatUint(j, 10)
+
+		newFileChunk, err := os.Open(currentChunkFileName)
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		defer newFileChunk.Close()
+
+		chunkInfo, err := newFileChunk.Stat()
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		// calculate the bytes size of each chunk
+		// we are not going to rely on previous data and constant
+
+		var chunkSize int64 = chunkInfo.Size()
+		chunkBufferBytes := make([]byte, chunkSize)
+
+		fmt.Println("Appending at position : [", writePosition, "] bytes")
+		writePosition = writePosition + chunkSize
+
+		// read into chunkBufferBytes
+		reader := bufio.NewReader(newFileChunk)
+		_, err = reader.Read(chunkBufferBytes)
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		// DON't USE ioutil.WriteFile -- it will overwrite the previous bytes!
+		// write/save buffer to disk
+		//ioutil.WriteFile(newFileName, chunkBufferBytes, os.ModeAppend)
+
+		n, err := file.Write(chunkBufferBytes)
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		file.Sync() //flush to disk
+
+		// free up the buffer for next cycle
+		// should not be a problem if the chunk size is small, but
+		// can be resource hogging if the chunk size is huge.
+		// also a good practice to clean up your own plate after eating
+
+		chunkBufferBytes = nil // reset or empty our buffer
+
+		fmt.Println("Written ", n, " bytes")
+
+		fmt.Println("Recombining part [", j, "] into : ", newFileName)
+	}
+
+	// now, we close the newFileName
+	file.Close()
+
 	return nil
 }
