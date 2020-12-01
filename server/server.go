@@ -10,10 +10,10 @@ import (
 	"os"
 	"time"
 
+	"google.golang.org/grpc/keepalive"
+
 	data "github.com/jamoreno22/lab2_dist/datanode_3/pkg/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type dataNodeServer struct {
@@ -27,38 +27,6 @@ var bookName string
 var bookParts int32
 
 func main() {
-
-	// NameNodeServer Connection ---------------------------------------
-	var nameConn *grpc.ClientConn
-
-	nameConn, err := grpc.Dial("10.10.28.20:9000", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Did not connect: %s", err)
-	}
-
-	defer nameConn.Close()
-
-	//runGetChunkDistribution(nameClient, &data.Message{Text: bookName})
-
-	// Datanode_2 Connection -------------------------------------------
-	var datanode1Conn *grpc.ClientConn
-
-	datanode1Conn, err2 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %s", err2)
-	}
-
-	defer datanode1Conn.Close()
-
-	// Datanode_2 Connection -------------------------------------------
-	var datanode2Conn *grpc.ClientConn
-
-	datanode2Conn, err3 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("did not connect: %s", err3)
-	}
-
-	defer datanode2Conn.Close()
 
 	// Server Logic ----------------------------------------------------
 	// create a listener on TCP port 9000
@@ -105,26 +73,22 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 		log.Println("Error de stream send proposal")
 	}
 
-	log.Println("ki voy")
-	a := 1
 	for _, prop := range proposals {
 
 		if err := stream.Send(&prop); err != nil {
 			log.Println("error al enviar chunk")
-			log.Fatalf("%v.Send(%d) = %v", stream, a, err)
 		}
-		a = a + 1
 	}
+	stream.CloseSend()
+	time.Sleep(5 * time.Second)
 	finalProposals := []data.Proposal{}
 	for {
-		log.Println("ki voy")
 
 		in, err := stream.Recv()
-		if err == io.EOF {
+		if err == io.EOF || len(proposals) == len(finalProposals) {
 			// read done.
 			runDistributeChunks(finalProposals)
 
-			log.Printf("weno")
 			return nil
 		}
 		if err != nil {
@@ -132,7 +96,6 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 		}
 		//in es cada proposal
 		finalProposals = append(finalProposals, *in)
-
 	}
 }
 
@@ -140,14 +103,16 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 
 //Distribute chunk server side
 func (d *dataNodeServer) DistributeChunks(ctx context.Context, req *data.Chunk) (*data.Message, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DistributeChunks not implemented")
+	os.Open("Chunks/")
+	ioutil.WriteFile(req.Name, req.Data, os.ModeAppend)
+	return &data.Message{Text: "OwO"}, nil
 }
 
 //SendBookInfo
 func (d *dataNodeServer) SendBookInfo(ctx context.Context, req *data.Book) (*data.Message, error) {
 	bookName = req.Name
 	bookParts = req.Parts
-	return nil, nil
+	return &data.Message{Text: "UwU"}, nil
 }
 
 //DistributionType server side
@@ -161,33 +126,34 @@ func runDistributeChunks(props []data.Proposal) error {
 	for _, prop := range props {
 
 		//-----  crear las conexiones a los otros datanodes ----------------------
-		var datanode2Conn *grpc.ClientConn
-		datanode2Conn, err2 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
+		var datanode1Conn *grpc.ClientConn
+		datanode1Conn, err2 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
 		if err2 != nil {
 			log.Fatalf("did not connect: %s", err2)
 		}
-		defer datanode2Conn.Close()
+		defer datanode1Conn.Close()
 
-		// Datanode_3 Connection -------------------------------------------
-		var datanode3Conn *grpc.ClientConn
-		datanode3Conn, err3 := grpc.Dial("10.10.28.19:9000", grpc.WithInsecure())
+		// Datanode_2 Connection -------------------------------------------
+		var datanode2Conn *grpc.ClientConn
+		datanode2Conn, err3 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
 		if err3 != nil {
 			log.Fatalf("did not connect: %s", err3)
 		}
-		defer datanode3Conn.Close()
+		defer datanode2Conn.Close()
 
-		if prop.Ip == "10.10.28.17:9000" {
+		if prop.Ip == "10.10.28.19:9000" {
 			// write/save buffer to disk
+			os.Open("Chunks/")
 			ioutil.WriteFile(prop.Chunk.Name, prop.Chunk.Data, os.ModeAppend)
-		} else if prop.Ip == "10.10.28.18:9000" {
-			datanode2Client := data.NewDataNodeClient(datanode2Conn)
-			_, err := datanode2Client.DistributeChunks(context.Background(), prop.Chunk)
+		} else if prop.Ip == "10.10.28.17:9000" {
+			datanode1Client := data.NewDataNodeClient(datanode1Conn)
+			_, err := datanode1Client.DistributeChunks(context.Background(), prop.Chunk)
 			if err != nil {
 				log.Printf("%v", err)
 			}
-		} else if prop.Ip == "10.10.28.19:9000" {
-			datanode3Client := data.NewDataNodeClient(datanode3Conn)
-			_, err := datanode3Client.DistributeChunks(context.Background(), prop.Chunk)
+		} else if prop.Ip == "10.10.28.18:9000" {
+			datanode2Client := data.NewDataNodeClient(datanode2Conn)
+			_, err := datanode2Client.DistributeChunks(context.Background(), prop.Chunk)
 			if err != nil {
 				log.Printf("%v", err)
 			}
@@ -198,7 +164,6 @@ func runDistributeChunks(props []data.Proposal) error {
 
 // UploadBook server side
 func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
-	log.Printf("Stream UploadBook")
 	book := data.Book{}
 	indice := 0
 	for {
@@ -219,11 +184,11 @@ func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 
 			// NameNodeServer Connection ---------------------------------------
 			var nameConn *grpc.ClientConn
-			nameConn, err := grpc.Dial("10.10.28.20:9000", grpc.WithInsecure())
+			nameConn, err := grpc.Dial("10.10.28.20:9000", grpc.WithInsecure(), grpc.WithKeepaliveParams(keepalive.ClientParameters{}))
 			if err != nil {
 				log.Fatalf("Did not connect: %s", err)
 			}
-			defer nameConn.Close()
+
 			nameClient := data.NewNameNodeClient(nameConn)
 			//-------------------------------------------------------------------
 
@@ -233,6 +198,7 @@ func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 				log.Fatalf("Did not connect: %s", err4)
 			}
 			runSendProposal(nameClient, prop)
+			defer nameConn.Close()
 			return (ubs.SendAndClose(&data.Message{Text: "EOF"}))
 		}
 		if err != nil {

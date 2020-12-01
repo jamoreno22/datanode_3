@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"strconv"
 
@@ -25,7 +26,7 @@ func main() {
 
 	defer conn.Close()
 
-	//dc := gral.NewDataNodeClient(conn)
+	dc := data.NewDataNodeClient(conn)
 
 	fmt.Println("Seleccione qué desea hacer:")
 	fmt.Println("0 : Cargar un libro")
@@ -54,7 +55,10 @@ func main() {
 		switch c {
 		//Centralizado
 		case '0':
-			//dc.DistributionType(context.Background(), data.Message{Text: "0"})
+			dc.DistributionType(context.Background(), &data.Message{Text: "0"})
+			fileToBeChunked := "books/Mujercitas-Alcott_Louisa_May.pdf"
+			bookName = "Mujercitas-Alcott_Louisa_May.pdf"
+			runUploadBook(dc, fileToBeChunked)
 			break
 		//Distribuido
 		case '1':
@@ -76,11 +80,69 @@ func main() {
 		break
 	}
 
-	//var fileToBeChunked string
-	//fileToBeChunked = "books/Mujercitas-Alcott_Louisa_May.pdf"
-	//bookName = "Mujercitas-Alcott_Louisa_May.pdf"
-	//runUploadBook(dc, fileToBeChunked)
+}
 
+func runUploadBook(dc data.DataNodeClient, fileToBeChunked string) error {
+	// -    - - - - - - -  - -    particionar pdf en chunks - - - - -  - - - -
+
+	file, err := os.Open(fileToBeChunked)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	fileInfo, _ := file.Stat()
+
+	var fileSize int64 = fileInfo.Size()
+
+	const fileChunk = 250000 // 1 MB, change this to your requirement
+
+	// calculate total number of parts the file will be chunked into
+
+	totalPartsNum := uint64(math.Ceil(float64(fileSize) / float64(fileChunk)))
+
+	book := make([]*data.Chunk, totalPartsNum)
+	part := 1
+
+	for i := uint64(0); i < totalPartsNum; i++ {
+
+		partSize := int(math.Min(fileChunk, float64(fileSize-int64(i*fileChunk))))
+		partBuffer := make([]byte, partSize)
+
+		file.Read(partBuffer)
+
+		// write to disk
+		fileName := "part_" + strconv.Itoa(part) + "_" + strconv.Itoa(int(totalPartsNum))
+
+		// books instantiation
+		book[i] = &data.Chunk{Name: fileName, Data: partBuffer}
+		part = part + 1
+	}
+	// - -- -- - - -- -  Send book info
+	dc.SendBookInfo(context.Background(), &data.Book{Name: bookName, Parts: int32(len(book))})
+	// - - - - - --- -- - -  stream chunks - - - - - - - - - - - -
+	stream, err := dc.UploadBook(context.Background())
+	if err != nil {
+		log.Println("Error de stream uploadBook")
+	}
+	a := 1
+	for _, chunk := range book {
+		if err := stream.Send(chunk); err != nil {
+			log.Println("error al enviar chunk")
+			log.Fatalf("%v.Send(%d) = %v", stream, a, err)
+		}
+		a = a + 1
+	}
+	_, errLast := stream.CloseAndRecv()
+	if errLast != nil {
+		log.Println("Error recepcion response")
+		return errLast
+	}
+	log.Printf("El libro ha sido subido correctamente")
+	return nil
 }
 
 func runDownloadBook(dc data.DataNodeClient, msg string) error {
@@ -155,7 +217,7 @@ func rebuildBook(chunks []data.Chunk) error {
 		var chunkSize int64 = chunkInfo.Size()
 		chunkBufferBytes := make([]byte, chunkSize)
 
-		fmt.Println("Appending at position : [", writePosition, "] bytes")
+		//fmt.Println("Appending at position : [", writePosition, "] bytes")
 		writePosition = writePosition + chunkSize
 
 		// read into chunkBufferBytes
