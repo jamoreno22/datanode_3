@@ -11,6 +11,7 @@ service DataNode {
     rpc UploadBook(stream Chunk) returns (Message) {}
     rpc DownloadBook(Message) returns (stream Chunk) {}
     rpc DistributeChunks(Chunk)returns(Message){}
+    rpc RescateChunks(Message)returns(Proposal){}
     //Distribuido
     rpc SendProposal(stream Proposal) returns (Message) {}
 
@@ -18,6 +19,7 @@ service DataNode {
 
 service NameNode {
 
+    rpc GetDistribution(Message)returns(Message){}
     rpc GetBookInfo(Book) returns (Message) {}
     //Centralizado
     rpc SendProposal(stream Proposal) returns (stream Proposal) {}

@@ -102,10 +102,11 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 // - - - - - - - - - - - - - DataNode Server functions - - - - - - - - - - - -
 
 //Distribute chunk server side
+
 func (d *dataNodeServer) DistributeChunks(ctx context.Context, req *data.Chunk) (*data.Message, error) {
 	os.Open("Chunks/")
 	ioutil.WriteFile(req.Name, req.Data, os.ModeAppend)
-	return &data.Message{Text: "OwO"}, nil
+	return &data.Message{Text: "Recibido"}, nil
 }
 
 //SendBookInfo
@@ -123,42 +124,41 @@ func (d *dataNodeServer) DistributionType(ctx context.Context, req *data.Message
 
 // DistributeChunks in another datanodes
 func runDistributeChunks(props []data.Proposal) error {
+	//-----  crear las conexiones a los otros datanodes ----------------------
+	var datanode2Conn *grpc.ClientConn
+	datanode2Conn, err2 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
+	if err2 != nil {
+		log.Fatalf("did not connect: %s", err2)
+	}
+
+	// Datanode_1 Connection -------------------------------------------
+	var datanode1Conn *grpc.ClientConn
+	datanode1Conn, err3 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
+	if err3 != nil {
+		log.Fatalf("did not connect: %s", err3)
+	}
+
 	for _, prop := range props {
-
-		//-----  crear las conexiones a los otros datanodes ----------------------
-		var datanode1Conn *grpc.ClientConn
-		datanode1Conn, err2 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
-		if err2 != nil {
-			log.Fatalf("did not connect: %s", err2)
-		}
-		defer datanode1Conn.Close()
-
-		// Datanode_2 Connection -------------------------------------------
-		var datanode2Conn *grpc.ClientConn
-		datanode2Conn, err3 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
-		if err3 != nil {
-			log.Fatalf("did not connect: %s", err3)
-		}
-		defer datanode2Conn.Close()
-
 		if prop.Ip == "10.10.28.19:9000" {
 			// write/save buffer to disk
 			os.Open("Chunks/")
 			ioutil.WriteFile(prop.Chunk.Name, prop.Chunk.Data, os.ModeAppend)
-		} else if prop.Ip == "10.10.28.17:9000" {
-			datanode1Client := data.NewDataNodeClient(datanode1Conn)
-			_, err := datanode1Client.DistributeChunks(context.Background(), prop.Chunk)
-			if err != nil {
-				log.Printf("%v", err)
-			}
 		} else if prop.Ip == "10.10.28.18:9000" {
 			datanode2Client := data.NewDataNodeClient(datanode2Conn)
 			_, err := datanode2Client.DistributeChunks(context.Background(), prop.Chunk)
 			if err != nil {
 				log.Printf("%v", err)
 			}
+		} else if prop.Ip == "10.10.28.17:9000" {
+			datanode1Client := data.NewDataNodeClient(datanode1Conn)
+			_, err := datanode1Client.DistributeChunks(context.Background(), prop.Chunk)
+			if err != nil {
+				log.Printf("%v", err)
+			}
 		}
 	}
+	defer datanode2Conn.Close()
+	defer datanode1Conn.Close()
 	return nil
 }
 
@@ -193,6 +193,10 @@ func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 			//-------------------------------------------------------------------
 
 			// Send Book Info to NameNodeServer
+			_, errd := nameClient.GetDistribution(context.Background(), &data.Message{Text: distributionType})
+			if errd != nil {
+				log.Printf("%v", errd)
+			}
 			_, err4 := nameClient.GetBookInfo(context.Background(), &data.Book{Name: bookName, Parts: bookParts})
 			if err4 != nil {
 				log.Fatalf("Did not connect: %s", err4)
@@ -208,6 +212,84 @@ func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 		indice = indice + 1
 
 	}
+}
+
+// Download Book
+func (d *dataNodeServer) DownloadBook(req *data.Message, srv data.DataNode_DownloadBookServer) error {
+	var nameConn *grpc.ClientConn
+	nameConn, err := grpc.Dial("10.10.28.20:9000", grpc.WithInsecure(), grpc.WithKeepaliveParams(keepalive.ClientParameters{}))
+	if err != nil {
+		log.Fatalf("Did not connect: %s", err)
+	}
+
+	nameClient := data.NewNameNodeClient(nameConn)
+	chunks, err := nameClient.GetChunkDistribution(context.Background(), req)
+	var distributedChunks []data.Proposal
+
+	for {
+		feature, err := chunks.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+		distributedChunks = append(distributedChunks, *feature)
+	}
+
+	//-----  crear las conexiones a los otros datanodes ----------------------
+	var datanode2Conn *grpc.ClientConn
+	datanode2Conn, err2 := grpc.Dial("10.10.28.18:9000", grpc.WithInsecure())
+	if err2 != nil {
+		log.Fatalf("did not connect: %s", err2)
+	}
+
+	// Datanode_1 Connection -------------------------------------------
+	var datanode1Conn *grpc.ClientConn
+	datanode1Conn, err3 := grpc.Dial("10.10.28.17:9000", grpc.WithInsecure())
+	if err3 != nil {
+		log.Fatalf("did not connect: %s", err3)
+	}
+
+	// Chunks Array to retrieve
+	var finalChunks = []data.Chunk{}
+	for i, prop := range distributedChunks {
+		if prop.Ip == "10.10.28.19:9000" {
+			// write/save buffer to disk
+			os.Open("Chunks/")
+			finalChunks[i].Data, _ = ioutil.ReadFile(prop.Chunk.Name)
+		} else if prop.Ip == "10.10.28.18:9000" {
+			datanode2Client := data.NewDataNodeClient(datanode2Conn)
+			prop2, err := datanode2Client.RescateChunks(context.Background(), &data.Message{Text: prop.Ip})
+			if err != nil {
+				log.Printf("%v", err)
+			}
+			finalChunks[i].Data = prop2.Chunk.Data
+		} else if prop.Ip == "10.10.28.17:9000" {
+			datanode1Client := data.NewDataNodeClient(datanode1Conn)
+			prop3, err := datanode1Client.RescateChunks(context.Background(), &data.Message{Text: prop.Ip})
+			if err != nil {
+				log.Printf("%v", err)
+			}
+			finalChunks[i].Data = prop3.Chunk.Data
+		}
+	}
+	defer datanode2Conn.Close()
+	defer datanode1Conn.Close()
+
+	for _, feature := range finalChunks {
+		if err := srv.Send(&feature); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Rescatar Chunks
+func (d *dataNodeServer) RescateChunks(ctx context.Context, req *data.Message) (*data.Proposal, error) {
+	prop := data.Proposal{}
+	prop.Chunk.Data, _ = ioutil.ReadFile(prop.Chunk.Name)
+	return &prop, nil
 }
 
 func generateProposals(book data.Book, Ips []string) []data.Proposal {

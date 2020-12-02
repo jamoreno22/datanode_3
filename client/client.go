@@ -62,21 +62,24 @@ func main() {
 			break
 		//Distribuido
 		case '1':
-			//dc.DistributionType(context.Background(), data.Message{Text: "1"})
+			dc.DistributionType(context.Background(), &data.Message{Text: "1"})
+			fileToBeChunked := "books/Mujercitas-Alcott_Louisa_May.pdf"
+			bookName = "Mujercitas-Alcott_Louisa_May.pdf"
+			runUploadBook(dc, fileToBeChunked)
 			break
 		}
 		break
 	//Download
 	case '1':
 		fmt.Println("Ingrese nombre del libro a descargar: ")
-		r := bufio.NewReader(os.Stdin)
-		c, _, err := r.ReadRune()
+		//r := bufio.NewReader(os.Stdin)
+		//c, _, err := r.ReadRune()
 
 		if err != nil {
 			fmt.Println(err)
 		}
-
-		fmt.Println(c)
+		runDownloadBook(dc, "books/Mujercitas-Alcott_Louisa_May.pdf")
+		fmt.Println("Descargado")
 		break
 	}
 
@@ -154,7 +157,7 @@ func runDownloadBook(dc data.DataNodeClient, msg string) error {
 	for {
 		chunk, err := stream.Recv()
 		if err == io.EOF {
-			//funcion para reconstruir los libros
+			rebuildBook(chunks)
 			return nil
 		}
 		if err != nil {
