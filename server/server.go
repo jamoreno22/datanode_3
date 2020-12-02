@@ -236,6 +236,7 @@ func (d *dataNodeServer) DownloadBook(req *data.Message, srv data.DataNode_Downl
 		}
 		distributedChunks = append(distributedChunks, *feature)
 	}
+	log.Printf("distribucion de chunks recibida")
 
 	//-----  crear las conexiones a los otros datanodes ----------------------
 	var datanode2Conn *grpc.ClientConn

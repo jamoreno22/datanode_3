@@ -154,9 +154,12 @@ func runDownloadBook(dc data.DataNodeClient, msg string) error {
 	if err != nil {
 		return err
 	}
+
 	for {
+		log.Printf("recibiendo chunks")
 		chunk, err := stream.Recv()
 		if err == io.EOF {
+			log.Printf("antes del rebuild")
 			rebuildBook(chunks)
 			return nil
 		}
