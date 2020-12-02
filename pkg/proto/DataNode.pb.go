@@ -6,12 +6,11 @@ package lab
 import (
 	context "context"
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/golang/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -265,31 +264,33 @@ func init() {
 }
 
 var fileDescriptor_2cc4c9d8f36887fb = []byte{
-	// 383 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x8c, 0x53, 0x4d, 0x6f, 0xda, 0x40,
-	0x10, 0xc5, 0x18, 0x53, 0x18, 0x0c, 0x45, 0x23, 0x0e, 0x56, 0xa5, 0x4a, 0x68, 0x4f, 0x6e, 0x55,
-	0x19, 0xe4, 0x1e, 0x7a, 0xe9, 0xa9, 0x45, 0xad, 0x72, 0x08, 0x8a, 0x1c, 0xf2, 0x03, 0x16, 0xd8,
-	0x10, 0x0b, 0xc7, 0x6b, 0x79, 0x17, 0x25, 0xf9, 0x9b, 0xfc, 0xa2, 0xac, 0x87, 0x0f, 0xd9, 0x10,
-	0x91, 0xdc, 0xde, 0xcc, 0xbc, 0x79, 0x7e, 0xf3, 0x56, 0x86, 0xde, 0x84, 0x6b, 0x3e, 0x95, 0x4b,
-	0x11, 0x64, 0xb9, 0xd4, 0x12, 0xed, 0x84, 0xcf, 0x99, 0x07, 0x8d, 0x7f, 0x71, 0x22, 0xb0, 0x0f,
-	0x76, 0x22, 0x57, 0x9e, 0x35, 0xb4, 0x7c, 0x37, 0x2a, 0x20, 0x9b, 0x41, 0xe3, 0x8f, 0x94, 0x6b,
-	0x44, 0x68, 0xa4, 0xfc, 0x51, 0xd0, 0xa8, 0x1d, 0x11, 0xc6, 0x01, 0x38, 0x19, 0xcf, 0xb5, 0xf2,
-	0xea, 0xa6, 0xe9, 0x44, 0xbb, 0x02, 0x19, 0x34, 0x17, 0x0f, 0x9b, 0x74, 0xad, 0x3c, 0x7b, 0x68,
-	0xfb, 0x9d, 0x10, 0x02, 0xf3, 0x85, 0xe0, 0x6f, 0xd1, 0x8a, 0xf6, 0x13, 0x36, 0x02, 0x87, 0x1a,
-	0x6f, 0xca, 0x9a, 0xde, 0xd2, 0x78, 0x24, 0x55, 0x37, 0x22, 0xcc, 0xbe, 0xc2, 0xa7, 0x6b, 0xa1,
-	0x14, 0x5f, 0xd1, 0x58, 0x8b, 0x67, 0x7d, 0x58, 0x29, 0x30, 0xfb, 0x0d, 0xad, 0x9b, 0x5c, 0x66,
-	0x52, 0xf1, 0x04, 0x7b, 0x50, 0x8f, 0xb3, 0xfd, 0xd4, 0x20, 0x1c, 0x82, 0x43, 0x5f, 0x25, 0xbd,
-	0xaa, 0x9d, 0xdd, 0x20, 0xdc, 0xd6, 0xa1, 0x75, 0x48, 0x05, 0xbf, 0x81, 0x7b, 0x2b, 0xd2, 0x65,
-	0x71, 0xf4, 0x55, 0x7a, 0x2f, 0xb1, 0x4d, 0xfc, 0xa2, 0xfc, 0xe2, 0x12, 0xdc, 0xfb, 0x60, 0x35,
-	0x1c, 0x43, 0x7f, 0x12, 0x2b, 0x9d, 0xc7, 0xf3, 0x8d, 0x8e, 0x65, 0x3a, 0x7b, 0xc9, 0x04, 0x56,
-	0x38, 0x67, 0x1b, 0xdf, 0x01, 0xee, 0xb2, 0x44, 0x72, 0x92, 0xc7, 0x92, 0x95, 0x53, 0xa6, 0x6f,
-	0xe1, 0x0f, 0x70, 0x27, 0xf2, 0x29, 0x3d, 0xb2, 0xab, 0xca, 0xa5, 0x5d, 0x56, 0x1b, 0x5b, 0x18,
-	0x94, 0xbc, 0x08, 0x6a, 0xab, 0x4b, 0xfa, 0x86, 0xdf, 0x8d, 0x84, 0x5a, 0xf0, 0x23, 0xb9, 0x2a,
-	0xdf, 0xa5, 0xea, 0x90, 0xa9, 0xe1, 0x8f, 0x76, 0xb1, 0x1c, 0x53, 0xae, 0x12, 0xce, 0xed, 0x87,
-	0x5b, 0x0b, 0x5a, 0x53, 0xf3, 0x9c, 0x14, 0xea, 0x08, 0x3e, 0xff, 0x17, 0xba, 0x1c, 0xd6, 0x3b,
-	0x41, 0xf9, 0xd0, 0x31, 0x0b, 0x1f, 0x79, 0x84, 0xf0, 0xb2, 0xb1, 0xd3, 0x43, 0x7c, 0xcb, 0x84,
-	0xf5, 0x0b, 0x06, 0x46, 0x9d, 0x0e, 0xbf, 0xe0, 0xe9, 0x74, 0x75, 0x6c, 0xcd, 0x9b, 0xf4, 0xcf,
-	0xfc, 0x7c, 0x0d, 0x00, 0x00, 0xff, 0xff, 0xb0, 0x30, 0x3e, 0xed, 0x45, 0x03, 0x00, 0x00,
+	// 413 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x8c, 0x53, 0xcf, 0xaf, 0xd2, 0x40,
+	0x10, 0xb6, 0x94, 0x22, 0x0c, 0x15, 0xc9, 0x84, 0x43, 0x63, 0x62, 0x42, 0x7a, 0xaa, 0x26, 0x16,
+	0x52, 0x0e, 0x5e, 0xbc, 0xa8, 0x44, 0xe3, 0x41, 0x42, 0x2a, 0xfe, 0x01, 0x5b, 0x58, 0xb1, 0xa1,
+	0x76, 0x9b, 0xee, 0xe2, 0x8f, 0xa3, 0xff, 0xd5, 0xfb, 0xf3, 0xde, 0x76, 0x4a, 0x5f, 0x5a, 0x5e,
+	0x1f, 0xbc, 0xdb, 0xec, 0xcc, 0x7c, 0xdf, 0x7c, 0xf3, 0x4d, 0x16, 0x46, 0x4b, 0xa6, 0xd8, 0x4a,
+	0xec, 0xb8, 0x9f, 0xe5, 0x42, 0x09, 0x34, 0x13, 0x16, 0xb9, 0x0e, 0x74, 0x3f, 0xc5, 0x09, 0xc7,
+	0x31, 0x98, 0x89, 0xd8, 0x3b, 0xc6, 0xd4, 0xf0, 0xec, 0xb0, 0x08, 0xdd, 0x0d, 0x74, 0x3f, 0x08,
+	0x71, 0x40, 0x84, 0x6e, 0xca, 0x7e, 0x71, 0x2a, 0x0d, 0x42, 0x8a, 0x71, 0x02, 0x56, 0xc6, 0x72,
+	0x25, 0x9d, 0x8e, 0x4e, 0x5a, 0x61, 0xf9, 0x40, 0x17, 0x7a, 0xdb, 0x9f, 0xc7, 0xf4, 0x20, 0x1d,
+	0x73, 0x6a, 0x7a, 0xc3, 0x00, 0x7c, 0x3d, 0xc1, 0xff, 0x58, 0xa4, 0xc2, 0x53, 0xc5, 0x9d, 0x81,
+	0x45, 0x89, 0x56, 0x5a, 0x9d, 0xdb, 0x69, 0x8d, 0xc4, 0x6a, 0x87, 0x14, 0xbb, 0x2f, 0xe1, 0xe9,
+	0x57, 0x2e, 0x25, 0xdb, 0x53, 0x59, 0xf1, 0xbf, 0xaa, 0x82, 0x14, 0xb1, 0xfb, 0x0e, 0xfa, 0xeb,
+	0x5c, 0x64, 0x42, 0xb2, 0x04, 0x47, 0xd0, 0x89, 0xb3, 0x53, 0x55, 0x47, 0x38, 0x05, 0x8b, 0xa6,
+	0x12, 0x5f, 0x53, 0x4e, 0x59, 0x08, 0xfe, 0x9b, 0xd0, 0xaf, 0x5c, 0xc1, 0x57, 0x60, 0x7f, 0xe3,
+	0xe9, 0xae, 0x58, 0xfa, 0x4b, 0xfa, 0x43, 0xe0, 0x80, 0xfa, 0x8b, 0xe7, 0x0b, 0x9b, 0xc2, 0x93,
+	0x0e, 0xf7, 0x09, 0xce, 0x61, 0xbc, 0x8c, 0xa5, 0xca, 0xe3, 0xe8, 0xa8, 0x62, 0x91, 0x6e, 0xfe,
+	0x65, 0x1c, 0x1b, 0x3d, 0xf7, 0x10, 0xaf, 0x01, 0xbe, 0x67, 0x89, 0x60, 0x44, 0x8f, 0x35, 0x29,
+	0xe7, 0x9d, 0x9e, 0x81, 0x1e, 0xd8, 0x4b, 0xf1, 0x27, 0x6d, 0xed, 0xae, 0xc5, 0x9a, 0xd5, 0xaf,
+	0xe9, 0xe0, 0x94, 0x94, 0x97, 0xb8, 0xf1, 0x0d, 0xd8, 0x21, 0x97, 0xdb, 0x63, 0xd5, 0xdb, 0xd4,
+	0xfc, 0x8c, 0x5e, 0x95, 0x9d, 0xba, 0x7d, 0x56, 0x3a, 0x72, 0x67, 0x70, 0xb3, 0xa1, 0x45, 0x79,
+	0x00, 0xf6, 0x3a, 0x4e, 0xf7, 0x0f, 0x01, 0xce, 0x07, 0x78, 0xc6, 0xdc, 0x08, 0x6e, 0x3a, 0xd0,
+	0x5f, 0xe9, 0xeb, 0xd3, 0x0d, 0x66, 0xf0, 0xfc, 0x33, 0x57, 0xef, 0x7f, 0xb3, 0x38, 0x4a, 0x78,
+	0xb1, 0xbc, 0xbc, 0xe2, 0x6b, 0x09, 0xa8, 0x1f, 0xe3, 0x0a, 0xc0, 0x83, 0xa1, 0x06, 0x3c, 0xe6,
+	0xc8, 0xc1, 0xe5, 0xed, 0xdb, 0x96, 0xc1, 0xb7, 0x30, 0xd1, 0xec, 0xe4, 0xee, 0x05, 0x4d, 0xe7,
+	0x50, 0x0d, 0x5c, 0xc0, 0xb8, 0x3e, 0xac, 0x00, 0x5f, 0xb5, 0x3b, 0xea, 0xd1, 0x47, 0x5e, 0xdc,
+	0x06, 0x00, 0x00, 0xff, 0xff, 0x73, 0x44, 0x8e, 0x89, 0xda, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -307,11 +308,12 @@ type DataNodeClient interface {
 	SendBookInfo(ctx context.Context, in *Book, opts ...grpc.CallOption) (*Message, error)
 	DistributionType(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 	UploadBook(ctx context.Context, opts ...grpc.CallOption) (DataNode_UploadBookClient, error)
-	DownloadBook(ctx context.Context, in *Message, opts ...grpc.CallOption) (DataNode_DownloadBookClient, error)
+	DownloadBook(ctx context.Context, in *Chunk, opts ...grpc.CallOption) (*Chunk, error)
 	DistributeChunks(ctx context.Context, in *Chunk, opts ...grpc.CallOption) (*Message, error)
-	RescateChunks(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Proposal, error)
+	RescueChunks(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Proposal, error)
 	//Distribuido
 	SendProposal(ctx context.Context, opts ...grpc.CallOption) (DataNode_SendProposalClient, error)
+	PingProposal(ctx context.Context, opts ...grpc.CallOption) (DataNode_PingProposalClient, error)
 }
 
 type dataNodeClient struct {
@@ -374,36 +376,13 @@ func (x *dataNodeUploadBookClient) CloseAndRecv() (*Message, error) {
 	return m, nil
 }
 
-func (c *dataNodeClient) DownloadBook(ctx context.Context, in *Message, opts ...grpc.CallOption) (DataNode_DownloadBookClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_DataNode_serviceDesc.Streams[1], "/lab.DataNode/DownloadBook", opts...)
+func (c *dataNodeClient) DownloadBook(ctx context.Context, in *Chunk, opts ...grpc.CallOption) (*Chunk, error) {
+	out := new(Chunk)
+	err := c.cc.Invoke(ctx, "/lab.DataNode/DownloadBook", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &dataNodeDownloadBookClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type DataNode_DownloadBookClient interface {
-	Recv() (*Chunk, error)
-	grpc.ClientStream
-}
-
-type dataNodeDownloadBookClient struct {
-	grpc.ClientStream
-}
-
-func (x *dataNodeDownloadBookClient) Recv() (*Chunk, error) {
-	m := new(Chunk)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 func (c *dataNodeClient) DistributeChunks(ctx context.Context, in *Chunk, opts ...grpc.CallOption) (*Message, error) {
@@ -415,9 +394,9 @@ func (c *dataNodeClient) DistributeChunks(ctx context.Context, in *Chunk, opts .
 	return out, nil
 }
 
-func (c *dataNodeClient) RescateChunks(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Proposal, error) {
+func (c *dataNodeClient) RescueChunks(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Proposal, error) {
 	out := new(Proposal)
-	err := c.cc.Invoke(ctx, "/lab.DataNode/RescateChunks", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/lab.DataNode/RescueChunks", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -425,7 +404,7 @@ func (c *dataNodeClient) RescateChunks(ctx context.Context, in *Message, opts ..
 }
 
 func (c *dataNodeClient) SendProposal(ctx context.Context, opts ...grpc.CallOption) (DataNode_SendProposalClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_DataNode_serviceDesc.Streams[2], "/lab.DataNode/SendProposal", opts...)
+	stream, err := c.cc.NewStream(ctx, &_DataNode_serviceDesc.Streams[1], "/lab.DataNode/SendProposal", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -458,16 +437,48 @@ func (x *dataNodeSendProposalClient) CloseAndRecv() (*Message, error) {
 	return m, nil
 }
 
+func (c *dataNodeClient) PingProposal(ctx context.Context, opts ...grpc.CallOption) (DataNode_PingProposalClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_DataNode_serviceDesc.Streams[2], "/lab.DataNode/PingProposal", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &dataNodePingProposalClient{stream}
+	return x, nil
+}
+
+type DataNode_PingProposalClient interface {
+	Send(*Proposal) error
+	Recv() (*Proposal, error)
+	grpc.ClientStream
+}
+
+type dataNodePingProposalClient struct {
+	grpc.ClientStream
+}
+
+func (x *dataNodePingProposalClient) Send(m *Proposal) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *dataNodePingProposalClient) Recv() (*Proposal, error) {
+	m := new(Proposal)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DataNodeServer is the server API for DataNode service.
 type DataNodeServer interface {
 	SendBookInfo(context.Context, *Book) (*Message, error)
 	DistributionType(context.Context, *Message) (*Message, error)
 	UploadBook(DataNode_UploadBookServer) error
-	DownloadBook(*Message, DataNode_DownloadBookServer) error
+	DownloadBook(context.Context, *Chunk) (*Chunk, error)
 	DistributeChunks(context.Context, *Chunk) (*Message, error)
-	RescateChunks(context.Context, *Message) (*Proposal, error)
+	RescueChunks(context.Context, *Message) (*Proposal, error)
 	//Distribuido
 	SendProposal(DataNode_SendProposalServer) error
+	PingProposal(DataNode_PingProposalServer) error
 }
 
 // UnimplementedDataNodeServer can be embedded to have forward compatible implementations.
@@ -483,17 +494,20 @@ func (*UnimplementedDataNodeServer) DistributionType(ctx context.Context, req *M
 func (*UnimplementedDataNodeServer) UploadBook(srv DataNode_UploadBookServer) error {
 	return status.Errorf(codes.Unimplemented, "method UploadBook not implemented")
 }
-func (*UnimplementedDataNodeServer) DownloadBook(req *Message, srv DataNode_DownloadBookServer) error {
-	return status.Errorf(codes.Unimplemented, "method DownloadBook not implemented")
+func (*UnimplementedDataNodeServer) DownloadBook(ctx context.Context, req *Chunk) (*Chunk, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadBook not implemented")
 }
 func (*UnimplementedDataNodeServer) DistributeChunks(ctx context.Context, req *Chunk) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DistributeChunks not implemented")
 }
-func (*UnimplementedDataNodeServer) RescateChunks(ctx context.Context, req *Message) (*Proposal, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RescateChunks not implemented")
+func (*UnimplementedDataNodeServer) RescueChunks(ctx context.Context, req *Message) (*Proposal, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RescueChunks not implemented")
 }
 func (*UnimplementedDataNodeServer) SendProposal(srv DataNode_SendProposalServer) error {
 	return status.Errorf(codes.Unimplemented, "method SendProposal not implemented")
+}
+func (*UnimplementedDataNodeServer) PingProposal(srv DataNode_PingProposalServer) error {
+	return status.Errorf(codes.Unimplemented, "method PingProposal not implemented")
 }
 
 func RegisterDataNodeServer(s *grpc.Server, srv DataNodeServer) {
@@ -562,25 +576,22 @@ func (x *dataNodeUploadBookServer) Recv() (*Chunk, error) {
 	return m, nil
 }
 
-func _DataNode_DownloadBook_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Message)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+func _DataNode_DownloadBook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Chunk)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	return srv.(DataNodeServer).DownloadBook(m, &dataNodeDownloadBookServer{stream})
-}
-
-type DataNode_DownloadBookServer interface {
-	Send(*Chunk) error
-	grpc.ServerStream
-}
-
-type dataNodeDownloadBookServer struct {
-	grpc.ServerStream
-}
-
-func (x *dataNodeDownloadBookServer) Send(m *Chunk) error {
-	return x.ServerStream.SendMsg(m)
+	if interceptor == nil {
+		return srv.(DataNodeServer).DownloadBook(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lab.DataNode/DownloadBook",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataNodeServer).DownloadBook(ctx, req.(*Chunk))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _DataNode_DistributeChunks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -601,20 +612,20 @@ func _DataNode_DistributeChunks_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DataNode_RescateChunks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DataNode_RescueChunks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Message)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DataNodeServer).RescateChunks(ctx, in)
+		return srv.(DataNodeServer).RescueChunks(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lab.DataNode/RescateChunks",
+		FullMethod: "/lab.DataNode/RescueChunks",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DataNodeServer).RescateChunks(ctx, req.(*Message))
+		return srv.(DataNodeServer).RescueChunks(ctx, req.(*Message))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -645,6 +656,32 @@ func (x *dataNodeSendProposalServer) Recv() (*Proposal, error) {
 	return m, nil
 }
 
+func _DataNode_PingProposal_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DataNodeServer).PingProposal(&dataNodePingProposalServer{stream})
+}
+
+type DataNode_PingProposalServer interface {
+	Send(*Proposal) error
+	Recv() (*Proposal, error)
+	grpc.ServerStream
+}
+
+type dataNodePingProposalServer struct {
+	grpc.ServerStream
+}
+
+func (x *dataNodePingProposalServer) Send(m *Proposal) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *dataNodePingProposalServer) Recv() (*Proposal, error) {
+	m := new(Proposal)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _DataNode_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "lab.DataNode",
 	HandlerType: (*DataNodeServer)(nil),
@@ -658,12 +695,16 @@ var _DataNode_serviceDesc = grpc.ServiceDesc{
 			Handler:    _DataNode_DistributionType_Handler,
 		},
 		{
+			MethodName: "DownloadBook",
+			Handler:    _DataNode_DownloadBook_Handler,
+		},
+		{
 			MethodName: "DistributeChunks",
 			Handler:    _DataNode_DistributeChunks_Handler,
 		},
 		{
-			MethodName: "RescateChunks",
-			Handler:    _DataNode_RescateChunks_Handler,
+			MethodName: "RescueChunks",
+			Handler:    _DataNode_RescueChunks_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -673,13 +714,14 @@ var _DataNode_serviceDesc = grpc.ServiceDesc{
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "DownloadBook",
-			Handler:       _DataNode_DownloadBook_Handler,
-			ServerStreams: true,
-		},
-		{
 			StreamName:    "SendProposal",
 			Handler:       _DataNode_SendProposal_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "PingProposal",
+			Handler:       _DataNode_PingProposal_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},
@@ -690,11 +732,14 @@ var _DataNode_serviceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type NameNodeClient interface {
+	GetAvaibleBooks(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 	GetDistribution(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error)
 	GetBookInfo(ctx context.Context, in *Book, opts ...grpc.CallOption) (*Message, error)
 	//Centralizado
 	SendProposal(ctx context.Context, opts ...grpc.CallOption) (NameNode_SendProposalClient, error)
 	GetChunkDistribution(ctx context.Context, in *Message, opts ...grpc.CallOption) (NameNode_GetChunkDistributionClient, error)
+	//distribuido
+	SendProposalDist(ctx context.Context, opts ...grpc.CallOption) (NameNode_SendProposalDistClient, error)
 }
 
 type nameNodeClient struct {
@@ -703,6 +748,15 @@ type nameNodeClient struct {
 
 func NewNameNodeClient(cc grpc.ClientConnInterface) NameNodeClient {
 	return &nameNodeClient{cc}
+}
+
+func (c *nameNodeClient) GetAvaibleBooks(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error) {
+	out := new(Message)
+	err := c.cc.Invoke(ctx, "/lab.NameNode/GetAvaibleBooks", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *nameNodeClient) GetDistribution(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Message, error) {
@@ -786,19 +840,59 @@ func (x *nameNodeGetChunkDistributionClient) Recv() (*Proposal, error) {
 	return m, nil
 }
 
+func (c *nameNodeClient) SendProposalDist(ctx context.Context, opts ...grpc.CallOption) (NameNode_SendProposalDistClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_NameNode_serviceDesc.Streams[2], "/lab.NameNode/SendProposalDist", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &nameNodeSendProposalDistClient{stream}
+	return x, nil
+}
+
+type NameNode_SendProposalDistClient interface {
+	Send(*Proposal) error
+	CloseAndRecv() (*Message, error)
+	grpc.ClientStream
+}
+
+type nameNodeSendProposalDistClient struct {
+	grpc.ClientStream
+}
+
+func (x *nameNodeSendProposalDistClient) Send(m *Proposal) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *nameNodeSendProposalDistClient) CloseAndRecv() (*Message, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Message)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // NameNodeServer is the server API for NameNode service.
 type NameNodeServer interface {
+	GetAvaibleBooks(context.Context, *Message) (*Message, error)
 	GetDistribution(context.Context, *Message) (*Message, error)
 	GetBookInfo(context.Context, *Book) (*Message, error)
 	//Centralizado
 	SendProposal(NameNode_SendProposalServer) error
 	GetChunkDistribution(*Message, NameNode_GetChunkDistributionServer) error
+	//distribuido
+	SendProposalDist(NameNode_SendProposalDistServer) error
 }
 
 // UnimplementedNameNodeServer can be embedded to have forward compatible implementations.
 type UnimplementedNameNodeServer struct {
 }
 
+func (*UnimplementedNameNodeServer) GetAvaibleBooks(ctx context.Context, req *Message) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAvaibleBooks not implemented")
+}
 func (*UnimplementedNameNodeServer) GetDistribution(ctx context.Context, req *Message) (*Message, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDistribution not implemented")
 }
@@ -811,9 +905,30 @@ func (*UnimplementedNameNodeServer) SendProposal(srv NameNode_SendProposalServer
 func (*UnimplementedNameNodeServer) GetChunkDistribution(req *Message, srv NameNode_GetChunkDistributionServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetChunkDistribution not implemented")
 }
+func (*UnimplementedNameNodeServer) SendProposalDist(srv NameNode_SendProposalDistServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendProposalDist not implemented")
+}
 
 func RegisterNameNodeServer(s *grpc.Server, srv NameNodeServer) {
 	s.RegisterService(&_NameNode_serviceDesc, srv)
+}
+
+func _NameNode_GetAvaibleBooks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Message)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NameNodeServer).GetAvaibleBooks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lab.NameNode/GetAvaibleBooks",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NameNodeServer).GetAvaibleBooks(ctx, req.(*Message))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _NameNode_GetDistribution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -899,10 +1014,40 @@ func (x *nameNodeGetChunkDistributionServer) Send(m *Proposal) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _NameNode_SendProposalDist_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(NameNodeServer).SendProposalDist(&nameNodeSendProposalDistServer{stream})
+}
+
+type NameNode_SendProposalDistServer interface {
+	SendAndClose(*Message) error
+	Recv() (*Proposal, error)
+	grpc.ServerStream
+}
+
+type nameNodeSendProposalDistServer struct {
+	grpc.ServerStream
+}
+
+func (x *nameNodeSendProposalDistServer) SendAndClose(m *Message) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *nameNodeSendProposalDistServer) Recv() (*Proposal, error) {
+	m := new(Proposal)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _NameNode_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "lab.NameNode",
 	HandlerType: (*NameNodeServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetAvaibleBooks",
+			Handler:    _NameNode_GetAvaibleBooks_Handler,
+		},
 		{
 			MethodName: "GetDistribution",
 			Handler:    _NameNode_GetDistribution_Handler,
@@ -923,6 +1068,11 @@ var _NameNode_serviceDesc = grpc.ServiceDesc{
 			StreamName:    "GetChunkDistribution",
 			Handler:       _NameNode_GetChunkDistribution_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "SendProposalDist",
+			Handler:       _NameNode_SendProposalDist_Handler,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "DataNode.proto",

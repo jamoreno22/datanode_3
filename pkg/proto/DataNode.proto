@@ -9,21 +9,27 @@ service DataNode {
     rpc SendBookInfo(Book)returns(Message){}
     rpc DistributionType(Message) returns (Message){}
     rpc UploadBook(stream Chunk) returns (Message) {}
-    rpc DownloadBook(Message) returns (stream Chunk) {}
+    rpc DownloadBook(Chunk) returns (Chunk) {}
     rpc DistributeChunks(Chunk)returns(Message){}
-    rpc RescateChunks(Message)returns(Proposal){}
+    rpc RescueChunks(Message)returns(Proposal){}
     //Distribuido
     rpc SendProposal(stream Proposal) returns (Message) {}
+    rpc PingProposal(stream Proposal) returns (stream Proposal){} 
 
 }
 
 service NameNode {
+
+    rpc GetAvaibleBooks(Message)returns(Message){}
 
     rpc GetDistribution(Message)returns(Message){}
     rpc GetBookInfo(Book) returns (Message) {}
     //Centralizado
     rpc SendProposal(stream Proposal) returns (stream Proposal) {}
     rpc GetChunkDistribution(Message) returns (stream Proposal) {}
+    //distribuido
+    rpc SendProposalDist(stream Proposal) returns (Message){}
+    
 }
 
 message File{
