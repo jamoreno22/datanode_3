@@ -96,7 +96,7 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 			}
 		}
 		stream.CloseSend()
-		time.Sleep(5 * time.Second)
+		//time.Sleep(5 * time.Second)
 		finalProposals := []data.Proposal{}
 		for {
 
