@@ -73,6 +73,11 @@ func runSendProposal(nc data.NameNodeClient, proposals []data.Proposal) error {
 		if err != nil {
 			log.Fatalf("%v.RecordRoute(_) = _, %v", nc, err)
 		}
+		for _, prop := range proposals {
+			if err := stream.Send(&prop); err != nil {
+				log.Fatalf("%v.Send(%v) = %v", stream, prop, err)
+			}
+		}
 		_, errD := stream.CloseAndRecv()
 		if errD != nil {
 			log.Fatalf("%v", errD)
@@ -230,50 +235,54 @@ func (d *dataNodeServer) UploadBook(ubs data.DataNode_UploadBookServer) error {
 				}
 
 				// envio de propuestas al datanode 1
-				datanode1Client := data.NewDataNodeClient(datanode1Conn)
-				streamdata1, _ := datanode1Client.PingProposal(context.Background())
+				if flag1 {
+					datanode1Client := data.NewDataNodeClient(datanode1Conn)
+					streamdata1, _ := datanode1Client.PingProposal(context.Background())
 
-				for _, pro := range prop {
-					if err := streamdata1.Send(&pro); err != nil {
-						log.Fatalf("Failed to send a proposal: %v", err)
+					for _, pro := range prop {
+						if err := streamdata1.Send(&pro); err != nil {
+							log.Fatalf("Failed to send a proposal: %v", err)
+						}
+					}
+					streamdata1.CloseSend()
+
+					for {
+						_, err := streamdata1.Recv()
+						if err == io.EOF {
+							flag1 = true
+							break
+						}
+						if err != nil {
+							log.Fatalf("Failed to receive a note : %v", err)
+						}
 					}
 				}
-				streamdata1.CloseSend()
-
-				for {
-					_, err := streamdata1.Recv()
-					if err == io.EOF {
-						flag1 = true
-						break
-					}
-					if err != nil {
-						log.Fatalf("Failed to receive a note : %v", err)
-					}
-				}
-
 				// envio de propuesta al datanode 2
-				datanode2Client := data.NewDataNodeClient(datanode2Conn)
-				streamdata2, _ := datanode2Client.PingProposal(context.Background())
+				if flag2 {
 
-				for _, pro := range prop {
-					if err := streamdata2.Send(&pro); err != nil {
-						log.Fatalf("Failed to send a proposal: %v", err)
+					datanode2Client := data.NewDataNodeClient(datanode2Conn)
+					streamdata2, _ := datanode2Client.PingProposal(context.Background())
+
+					for _, pro := range prop {
+						if err := streamdata2.Send(&pro); err != nil {
+							log.Fatalf("Failed to send a proposal: %v", err)
+						}
+					}
+					streamdata2.CloseSend()
+
+					for {
+						_, err := streamdata2.Recv()
+						if err == io.EOF {
+							flag2 = true
+							break
+						}
+						if err != nil {
+							log.Fatalf("Failed to receive a note : %v", err)
+						}
 					}
 				}
-				streamdata2.CloseSend()
 
-				for {
-					_, err := streamdata2.Recv()
-					if err == io.EOF {
-						flag2 = true
-						break
-					}
-					if err != nil {
-						log.Fatalf("Failed to receive a note : %v", err)
-					}
-				}
-
-				if !(flag1 && flag2 == true) {
+				if flag1 == false || flag2 == false {
 					b, i := checkProposal(prop)
 					if !b {
 						prop = generateProposals(book, i)
